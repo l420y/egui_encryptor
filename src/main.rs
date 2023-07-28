@@ -5,10 +5,11 @@ use eframe::egui;
 use eframe::egui::{Align, Layout};
 use rfd;
 
-use Mode::*;
+use Cipher::*;
 
 use crate::encryption::binary_encryption::binary_util;
 use crate::encryption::xor_encryption::xor_util;
+use crate::Mode::{Decrypt, Encrypt};
 
 pub mod encryption;
 
@@ -16,7 +17,7 @@ const FL: f32 = 10.0;
 
 fn main() {
     let options = NativeOptions {
-        initial_window_size: Some(egui::vec2(400.0, 300.0)),
+        initial_window_size: Some(egui::vec2(400.0, 275.0)),
         drag_and_drop_support: true,
         resizable: false,
         fullscreen: false,
@@ -26,13 +27,20 @@ fn main() {
 }
 
 #[derive(Debug, PartialEq)]
-enum Mode {
+enum Cipher {
     Xor,
     Binary,
     //Todo()!
 }
 
+#[derive(Debug, PartialEq)]
+pub enum Mode {
+    Encrypt,
+    Decrypt,
+}
+
 struct Enc {
+    cipher: Cipher,
     mode: Mode,
     key: u8,
     picked_path: String,
@@ -43,7 +51,8 @@ struct Enc {
 impl Default for Enc {
     fn default() -> Self {
         Self {
-            mode: Xor,
+            cipher: Xor,
+            mode: Encrypt,
             key: 1,
             picked_path: String::default(),
             new_name: String::default(),
@@ -60,23 +69,34 @@ impl App for Enc {
                 ui.add_space(FL);
                 egui::Grid::new("mode_grid").show(ui, |ui| {
                     egui::ComboBox::from_label(String::new())
-                        .selected_text(format!("Mode: {:?}", self.mode))
+                        .selected_text(format!("Cipher: {:?}", self.cipher))
                         .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut self.mode, Xor, "Xor");
-                            ui.selectable_value(&mut self.mode, Binary, "Binary");
+                            ui.selectable_value(&mut self.cipher, Xor, "Xor");
+                            ui.selectable_value(&mut self.cipher, Binary, "Binary");
                             //Todo()!
                         });
 
-                    if self.mode == Xor {
-                        ui.horizontal(|ui| {
-                            egui::ComboBox::from_label(" ")
-                                .selected_text(format!("Key: {:?}", self.key))
+                    match self.cipher {
+                        Xor => {
+                            ui.horizontal(|ui| {
+                                egui::ComboBox::from_label(" ")
+                                    .selected_text(format!("Key: {:?}", self.key))
+                                    .show_ui(ui, |ui| {
+                                        for key in 1..=255 {
+                                            ui.selectable_value(&mut self.key, key, key.to_string());
+                                        }
+                                    });
+                            });
+                        }
+                        Binary => {
+                            egui::ComboBox::from_label("  ")
+                                .selected_text(format!("Mode: {:?}", &self.mode))
                                 .show_ui(ui, |ui| {
-                                    for key in 1..=255 {
-                                        ui.selectable_value(&mut self.key, key, key.to_string());
-                                    }
+                                    ui.selectable_value(&mut self.mode, Encrypt, "Encrypt");
+                                    ui.selectable_value(&mut self.mode, Decrypt, "Decrypt");
                                 });
-                        });
+                        }
+                        _ => {}
                     }
                     ui.end_row();
                 });
@@ -87,6 +107,7 @@ impl App for Enc {
                 if ui.button("Browse Explorer...").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_file() {
                         self.picked_path = path.display().to_string();
+                        self.new_name = self.picked_path.clone();
                     }
                 }
             });
@@ -115,15 +136,23 @@ impl App for Enc {
                     self.new_name = String::from(&self.picked_path);
                 }
 
-                match self.mode {
+                match self.cipher {
                     Xor => {
                         xor_util(&self.picked_path, &self.new_name, self.key);
                     }
 
                     Binary => {
-                        binary_util(&self.picked_path, &self.new_name);
+                        match self.mode {
+                            Encrypt => {
+                                binary_util(&self.picked_path, &self.new_name, false);
+                            }
+                            Decrypt => {
+                                binary_util(&self.picked_path, &self.new_name, true);
+                            }
+                            _ => {}
+                        }
                     }
-                    _ => {} //Todo()!
+                    _ => {}
                 }
             }
         });
