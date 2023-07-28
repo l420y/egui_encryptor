@@ -1,31 +1,33 @@
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Read, Write};
-use std::num::ParseIntError;
 use std::str;
+
+use ascii_converter::*;
 
 pub fn binary_enc(data: Vec<u8>) -> String {
     if data.is_empty() {
         println!("Fatal error\n");
     }
-    let parsed_data = str::from_utf8(&data).unwrap().to_string(); //formatting bytes without string parse bad idea :skull:
+
     let mut binary_data = String::default();
-    for character in parsed_data.clone().into_bytes() {
-        binary_data += &format!("0{:b} ", character);
+    for character in data {
+        binary_data += &format!("{:b} ", character);
     }
     return binary_data;
 }
 
 pub fn binary_dec(data: Vec<u8>) -> String {
-   let s_data = str::from_utf8(&data).unwrap();
-    let dec_data = String::from_utf8(data).unwrap();
+    let parsed_data = str::from_utf8(&data).unwrap().to_string();
+    let dec_data = String::from_utf8(binary_to_decimal(&dec_util(&parsed_data)).unwrap()).unwrap();
     return dec_data;
 }
 
-pub fn dec_util(s: &str) -> Result<Vec<u8>, ParseIntError> {
-    (0..s.len())
-        .step_by(9)
-        .map(|i| u8::from_str_radix(&s[i..i + 8], 2))
-        .collect()
+pub fn dec_util(s: &String) -> Vec<u32> {
+    let mut bin_vec: Vec<u32> = Vec::new();
+    for bytes in s.split_whitespace() {
+        bin_vec.push(bytes.parse::<u32>().unwrap());
+    }
+    return bin_vec;
 }
 
 pub fn binary_util(input_file_path: &String, output_file_path: &String, should_dec: bool) {

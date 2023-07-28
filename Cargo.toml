@@ -8,4 +8,4 @@ description = "Simple egui rust file encryptor. Enjoy!"
 [dependencies]
 eframe = "0.22.0"
 rfd = "0.11"
-math_matrix = "1.1.0"
+ascii_converter = "0.3.0"
