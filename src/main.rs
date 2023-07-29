@@ -17,7 +17,7 @@ const FL: f32 = 10.0;
 
 fn main() {
     let options = NativeOptions {
-        initial_window_size: Some(egui::vec2(400.0, 275.0)),
+        initial_window_size: Some(egui::vec2(370.0, 170.0)),
         drag_and_drop_support: true,
         resizable: false,
         fullscreen: false,
@@ -75,7 +75,6 @@ impl App for Enc {
                             ui.selectable_value(&mut self.cipher, Binary, "Binary");
                             //Todo()!
                         });
-
                     match self.cipher {
                         Xor => {
                             ui.horizontal(|ui| {
@@ -101,46 +100,39 @@ impl App for Enc {
                     ui.end_row();
                 });
                 ui.add_space(FL);
-            });
-
-            ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
-                if ui.button("Browse Explorer...").clicked() {
-                    if let Some(path) = rfd::FileDialog::new().pick_file() {
-                        self.picked_path = path.display().to_string();
-                        self.new_name = self.picked_path.clone();
+                ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
+                    if ui.button("Browse Explorer...").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().pick_file() {
+                            self.picked_path = path.display().to_string();
+                            self.new_name = self.picked_path.clone();
+                        }
                     }
+                    ui.add_space(FL);
+                    ui.horizontal(|ui| {
+                        ui.monospace(&self.picked_path);
+                        ui.add_space(FL);
+                    });
+                });
+            });
+            ui.add_space(FL);
+            ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
+                ui.checkbox(&mut self.save_as_new, "Save as new");
+                ui.add_space(FL);
+                if self.save_as_new {
+                    ui.horizontal(|ui| {
+                        ui.text_edit_singleline(&mut self.new_name);
+                    });
                 }
             });
-
             ui.add_space(FL);
-            ui.horizontal(|ui| {
-                ui.label(egui::RichText::new("File:").size(FL * 1.5));
-                ui.monospace(&self.picked_path);
-                ui.add_space(FL);
-            });
-
-            ui.add_space(FL);
-            ui.checkbox(&mut self.save_as_new, "Save as new file");
-            ui.add_space(FL);
-            if self.save_as_new {
-                ui.vertical(|ui| {
-                    ui.label(egui::RichText::new("New file:").size(FL * 1.5));
-                    ui.add_space(FL);
-                    ui.text_edit_singleline(&mut self.new_name);
-                    ui.add_space(FL);
-                });
-            }
-
             if ui.button("Start").clicked() && self.picked_path != String::default() {
                 if !self.save_as_new {
                     self.new_name = String::from(&self.picked_path);
                 }
-
                 match self.cipher {
                     Xor => {
                         xor_util(&self.picked_path, &self.new_name, self.key);
                     }
-
                     Binary => {
                         match self.mode {
                             Encrypt => {
