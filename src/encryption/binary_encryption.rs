@@ -18,14 +18,16 @@ pub fn binary_enc(data: Vec<u8>) -> String {
 
 pub fn binary_dec(data: Vec<u8>) -> String {
     let parsed_data = str::from_utf8(&data).unwrap().to_string();
-    let dec_data = String::from_utf8(binary_to_decimal(&dec_util(&parsed_data)).unwrap()).unwrap();
+    let dec_data = String::from_utf8(binary_to_decimal(&dec_util(parsed_data)).unwrap()).unwrap();
     return dec_data;
 }
 
-pub fn dec_util(s: &String) -> Vec<u32> {
+pub fn dec_util(s: String) -> Vec<u32> {
     let mut bin_vec: Vec<u32> = Vec::new();
-    for bytes in s.split_whitespace() {
-        bin_vec.push(bytes.parse::<u32>().unwrap());
+    if !s.chars().all(char::is_alphabetic) {
+        for bytes in s.split_whitespace() {
+            bin_vec.push(bytes.parse::<u32>().unwrap());
+        }
     }
     return bin_vec;
 }
@@ -34,6 +36,7 @@ pub fn binary_util(input_file_path: &String, output_file_path: &String, should_d
     let input_file = File::open(&input_file_path).unwrap();
     let mut reader: BufReader<File> = BufReader::new(input_file);
     let mut input_data: Vec<u8> = Vec::new();
+
     let mut binary_data: String = String::new();
 
     if let Err(err) = reader.read_to_end(&mut input_data) {

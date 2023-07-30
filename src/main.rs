@@ -1,4 +1,8 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+//Пожалел вас
 use std::fmt::Debug;
+use std::ops::Add;
 
 use eframe::{App, NativeOptions, run_native};
 use eframe::egui;
@@ -44,6 +48,7 @@ struct Enc {
     mode: Mode,
     key: u8,
     picked_path: String,
+    display_path: String,
     new_name: String,
     save_as_new: bool,
 }
@@ -55,6 +60,7 @@ impl Default for Enc {
             mode: Encrypt,
             key: 1,
             picked_path: String::default(),
+            display_path: String::default(),
             new_name: String::default(),
             save_as_new: false,
         }
@@ -103,13 +109,17 @@ impl App for Enc {
                 ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
                     if ui.button("Browse Explorer...").clicked() {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
-                            self.picked_path = path.display().to_string();
+                            self.picked_path = path.to_str().unwrap().to_string();
+                            self.display_path = self.picked_path.clone();
                             self.new_name = self.picked_path.clone();
+                            if self.display_path.chars().count() > 33 {
+                                self.display_path = self.picked_path.clone()[0..31].to_string().add("..");
+                            }
                         }
                     }
                     ui.add_space(FL);
                     ui.horizontal(|ui| {
-                        ui.monospace(&self.picked_path);
+                        ui.monospace(&self.display_path);
                         ui.add_space(FL);
                     });
                 });
