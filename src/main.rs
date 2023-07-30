@@ -1,6 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-//Пожалел вас
 use std::fmt::Debug;
 use std::ops::Add;
 
@@ -22,6 +21,8 @@ const FL: f32 = 10.0;
 fn main() {
     let options = NativeOptions {
         initial_window_size: Some(egui::vec2(370.0, 170.0)),
+        maximized: false,
+        vsync: true,
         drag_and_drop_support: true,
         resizable: false,
         fullscreen: false,
@@ -46,11 +47,11 @@ pub enum Mode {
 struct Enc {
     cipher: Cipher,
     mode: Mode,
-    key: u8,
     picked_path: String,
     display_path: String,
     new_name: String,
     save_as_new: bool,
+    key: u8,
 }
 
 impl Default for Enc {
@@ -58,11 +59,11 @@ impl Default for Enc {
         Self {
             cipher: Xor,
             mode: Encrypt,
-            key: 1,
             picked_path: String::default(),
             display_path: String::default(),
             new_name: String::default(),
             save_as_new: false,
+            key: 1,
         }
     }
 }
@@ -79,7 +80,6 @@ impl App for Enc {
                         .show_ui(ui, |ui| {
                             ui.selectable_value(&mut self.cipher, Xor, "Xor");
                             ui.selectable_value(&mut self.cipher, Binary, "Binary");
-                            //Todo()!
                         });
                     match self.cipher {
                         Xor => {
@@ -107,13 +107,13 @@ impl App for Enc {
                 });
                 ui.add_space(FL);
                 ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
-                    if ui.button("Browse Explorer...").clicked() {
+                    if ui.button("Open Explorer...").clicked() {
                         if let Some(path) = rfd::FileDialog::new().pick_file() {
                             self.picked_path = path.to_str().unwrap().to_string();
                             self.display_path = self.picked_path.clone();
                             self.new_name = self.picked_path.clone();
                             if self.display_path.chars().count() > 33 {
-                                self.display_path = self.picked_path.clone()[0..31].to_string().add("..");
+                                self.display_path = self.picked_path.clone()[0..30].to_string().add("..");
                             }
                         }
                     }

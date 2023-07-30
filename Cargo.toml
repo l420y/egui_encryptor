@@ -4,6 +4,7 @@ version = "0.1.2"
 edition = "2021"
 authors = ["L420Y"]
 description = "Simple egui rust file encryptor. Enjoy!"
+repository = "https://github.com/l420y/egui_encryptor"
 
 [dependencies]
 eframe = "0.22.0"

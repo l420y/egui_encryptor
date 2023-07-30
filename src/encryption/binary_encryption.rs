@@ -5,20 +5,18 @@ use std::str;
 use ascii_converter::*;
 
 pub fn binary_enc(data: Vec<u8>) -> String {
-    if data.is_empty() {
-        println!("Fatal error\n");
-    }
-
     let mut binary_data = String::default();
-    for character in data {
-        binary_data += &format!("{:b} ", character);
+    if !data.is_empty() {
+        for character in data {
+            binary_data += &format!("{:b} ", character);
+        }
     }
     return binary_data;
 }
 
 pub fn binary_dec(data: Vec<u8>) -> String {
-    let parsed_data = str::from_utf8(&data).unwrap().to_string();
-    let dec_data = String::from_utf8(binary_to_decimal(&dec_util(parsed_data)).unwrap()).unwrap();
+    let parsed_data: String = str::from_utf8(&data).unwrap().to_string();
+    let dec_data: String = String::from_utf8(binary_to_decimal(&dec_util(parsed_data)).unwrap()).unwrap();
     return dec_data;
 }
 
@@ -33,26 +31,16 @@ pub fn dec_util(s: String) -> Vec<u32> {
 }
 
 pub fn binary_util(input_file_path: &String, output_file_path: &String, should_dec: bool) {
-    let input_file = File::open(&input_file_path).unwrap();
-    let mut reader: BufReader<File> = BufReader::new(input_file);
     let mut input_data: Vec<u8> = Vec::new();
-
     let mut binary_data: String = String::new();
+    let mut reader: BufReader<File> = BufReader::new(File::open(&input_file_path).unwrap());
+    reader.read_to_end(&mut input_data).unwrap();
 
-    if let Err(err) = reader.read_to_end(&mut input_data) {
-        println!("Fatal error {err}\n");
+    match should_dec {
+        true => { binary_data = binary_dec(input_data); }
+        false => { binary_data = binary_enc(input_data); }
     }
 
-    if should_dec {
-        binary_data = binary_dec(input_data);
-    } else {
-        binary_data = binary_enc(input_data);
-    }
-
-    let output_file = File::create(output_file_path).unwrap();
-    let mut writer: BufWriter<File> = BufWriter::new(output_file);
-
-    if let Err(err) = writer.write_all(&binary_data.into_bytes()) {
-        println!("Fatal error {err}\n");
-    }
+    let mut writer: BufWriter<File> = BufWriter::new(File::create(output_file_path).unwrap());
+    writer.write_all(&binary_data.into_bytes()).unwrap();
 }
