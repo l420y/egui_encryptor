@@ -5,7 +5,7 @@ use std::str;
 use ascii_converter::*;
 
 pub fn binary_enc(data: Vec<u8>) -> String {
-    let mut binary_data = String::default();
+    let mut binary_data: String = String::default();
     if !data.is_empty() {
         for character in data {
             binary_data += &format!("{:b} ", character);

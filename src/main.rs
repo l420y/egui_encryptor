@@ -5,7 +5,7 @@ use std::ops::Add;
 
 use eframe::{App, NativeOptions, run_native};
 use eframe::egui;
-use eframe::egui::{Align, Layout};
+use eframe::egui::{Align, Color32, Layout};
 use rfd;
 
 use Cipher::*;
@@ -20,7 +20,7 @@ const FL: f32 = 10.0;
 
 fn main() {
     let options = NativeOptions {
-        initial_window_size: Some(egui::vec2(370.0, 170.0)),
+        initial_window_size: Some(egui::vec2(800.0, 400.0)),
         maximized: false,
         vsync: true,
         drag_and_drop_support: true,
@@ -71,16 +71,20 @@ impl Default for Enc {
 impl App for Enc {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.with_layout(Layout::top_down(Align::Center), |ui| {
-                ui.label(egui::RichText::new("Settings:").size(FL * 2.0));
-                ui.add_space(FL);
-                egui::Grid::new("mode_grid").show(ui, |ui| {
+            egui::Grid::new("mode_grid").show(ui, |ui| {
+                ui.label(egui::RichText::new("Settings").size(FL * 2.5));
+                ui.add_space(FL * 3.0);
+                ui.end_row();
+                ui.with_layout(Layout::top_down(Align::Center), |ui| {
+                    ui.add_space(FL);
                     egui::ComboBox::from_label(String::new())
                         .selected_text(format!("Cipher: {:?}", self.cipher))
                         .show_ui(ui, |ui| {
                             ui.selectable_value(&mut self.cipher, Xor, "Xor");
                             ui.selectable_value(&mut self.cipher, Binary, "Binary");
                         });
+                    ui.end_row();
+                    ui.add_space(FL);
                     match self.cipher {
                         Xor => {
                             ui.horizontal(|ui| {
@@ -103,60 +107,68 @@ impl App for Enc {
                         }
                         _ => {}
                     }
-                    ui.end_row();
-                });
-                ui.add_space(FL);
-                ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
-                    if ui.button("Open Explorer...").clicked() {
-                        if let Some(path) = rfd::FileDialog::new().pick_file() {
-                            self.picked_path = path.to_str().unwrap().to_string();
-                            self.display_path = self.picked_path.clone();
-                            self.new_name = self.picked_path.clone();
-                            if self.display_path.chars().count() > 33 {
-                                self.display_path = self.picked_path.clone()[0..30].to_string().add("..");
+                    ui.add_space(FL);
+                    ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
+                        if ui.button("Open Explorer...").clicked() {
+                            if let Some(path) = rfd::FileDialog::new().pick_file() {
+                                self.picked_path = path.to_str().unwrap().to_string();
+                                self.display_path = self.picked_path.clone();
+                                self.new_name = self.picked_path.clone();
+                                if self.display_path.chars().count() > 33 {
+                                    self.display_path = self.picked_path.clone()[0..30].to_string().add("..");
+                                }
                             }
                         }
-                    }
+                    });
                     ui.add_space(FL);
-                    ui.horizontal(|ui| {
-                        ui.monospace(&self.display_path);
+                });
+                ui.end_row();
+                ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
+                    ui.checkbox(&mut self.save_as_new, "Save as new");
+                });
+                ui.end_row();
+                if self.save_as_new {
+                    ui.vertical(|ui| {
+                        ui.add_space(FL);
+                        ui.text_edit_singleline(&mut self.new_name);
                         ui.add_space(FL);
                     });
+                }
+                ui.end_row();
+                ui.label(egui::RichText::new("Info").size(FL * 2.5));
+                ui.end_row();
+                ui.label(egui::RichText::new("Current file:").size(FL * 1.5));
+                ui.end_row();
+                ui.horizontal(|ui| {
+                    ui.label(egui::RichText::new(&self.display_path).monospace().color(Color32::DARK_GREEN));
                 });
             });
-            ui.add_space(FL);
-            ui.with_layout(Layout::left_to_right(Align::Min), |ui| {
-                ui.checkbox(&mut self.save_as_new, "Save as new");
-                ui.add_space(FL);
-                if self.save_as_new {
-                    ui.horizontal(|ui| {
-                        ui.text_edit_singleline(&mut self.new_name);
-                    });
+            ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
+                egui::widgets::global_dark_light_mode_buttons(ui);
+
+                if ui.button("Start process").clicked() && self.picked_path != String::default() {
+                    if !self.save_as_new {
+                        self.new_name = String::from(&self.picked_path);
+                    }
+                    match self.cipher {
+                        Xor => {
+                            xor_util(&self.picked_path, &self.new_name, self.key);
+                        }
+                        Binary => {
+                            match self.mode {
+                                Encrypt => {
+                                    binary_util(&self.picked_path, &self.new_name, false);
+                                }
+                                Decrypt => {
+                                    binary_util(&self.picked_path, &self.new_name, true);
+                                }
+                                _ => {}
+                            }
+                        }
+                        _ => {}
+                    }
                 }
             });
-            ui.add_space(FL);
-            if ui.button("Start").clicked() && self.picked_path != String::default() {
-                if !self.save_as_new {
-                    self.new_name = String::from(&self.picked_path);
-                }
-                match self.cipher {
-                    Xor => {
-                        xor_util(&self.picked_path, &self.new_name, self.key);
-                    }
-                    Binary => {
-                        match self.mode {
-                            Encrypt => {
-                                binary_util(&self.picked_path, &self.new_name, false);
-                            }
-                            Decrypt => {
-                                binary_util(&self.picked_path, &self.new_name, true);
-                            }
-                            _ => {}
-                        }
-                    }
-                    _ => {}
-                }
-            }
         });
     }
 }
