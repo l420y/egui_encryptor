@@ -2,6 +2,7 @@
 
 use std::fmt::Debug;
 use std::ops::Add;
+use std::os::windows::fs::MetadataExt;
 
 use eframe::{App, NativeOptions, run_native};
 use eframe::egui;
@@ -52,6 +53,7 @@ struct Enc {
     new_name: String,
     save_as_new: bool,
     key: u8,
+    file_size: u64,
 }
 
 impl Default for Enc {
@@ -64,6 +66,7 @@ impl Default for Enc {
             new_name: String::default(),
             save_as_new: false,
             key: 1,
+            file_size: u64::default(),
         }
     }
 }
@@ -83,7 +86,7 @@ impl App for Enc {
                         ui.selectable_value(&mut self.cipher, Binary, "Binary");
                     });
                 ui.add_space(FL * 3.0);
-                ui.label(egui::RichText::new("Current file:").size(FL * 1.5));
+                ui.label(egui::RichText::new("File path:").size(FL * 1.5));
                 ui.label(egui::RichText::new(&self.display_path).color(Color32::DARK_GREEN));
                 ui.end_row();
                 match self.cipher {
@@ -106,12 +109,16 @@ impl App for Enc {
                     }
                     _ => {}
                 }
+                ui.add_space(FL * 3.0);
+                ui.label(egui::RichText::new("File size:").size(FL * 1.5));
+                if self.file_size != 0 { ui.label(egui::RichText::new(&self.file_size.to_string().add("b")).color(Color32::DARK_GREEN)); }
                 ui.end_row();
                 if ui.button("Open Explorer...").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_file() {
                         self.picked_path = path.to_str().unwrap().to_string();
                         self.display_path = self.picked_path.clone();
                         self.new_name = self.picked_path.clone();
+                        self.file_size = std::fs::metadata(&self.picked_path).unwrap().file_size();
                         if self.display_path.chars().count() > 99 {
                             self.display_path = self.picked_path.clone()[0..96].to_string().add("..");
                         }
