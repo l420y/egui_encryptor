@@ -1,6 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::fmt::Debug;
+use std::fs::File;
 use std::ops::Add;
 use std::os::windows::fs::MetadataExt;
 use std::path::Path;
@@ -54,6 +55,7 @@ struct Enc {
     new_name: String,
     file_extension: String,
     save_as_new: bool,
+    readonly: bool,
     key: u8,
     file_size: u64,
 }
@@ -68,6 +70,7 @@ impl Default for Enc {
             new_name: String::default(),
             file_extension: String::default(),
             save_as_new: false,
+            readonly: false,
             key: 1,
             file_size: u64::default(),
         }
@@ -112,9 +115,10 @@ impl App for Enc {
                     }
                     _ => {}
                 }
+
                 ui.add_space(FL * 3.0);
                 ui.label(egui::RichText::new("File size:").size(FL * 1.5));
-                if self.file_size != 0 { ui.label(egui::RichText::new(&self.file_size.to_string().add("b")).color(Color32::DARK_GREEN)); }
+                if self.file_size != 0 { ui.label(egui::RichText::new(&self.file_size.to_string().add(" bytes")).color(Color32::DARK_GREEN)); }
                 ui.end_row();
                 if ui.button("Open Explorer...").clicked() {
                     if let Some(path) = rfd::FileDialog::new().pick_file() {
@@ -131,16 +135,21 @@ impl App for Enc {
 
                 ui.add_space(FL * 3.0);
                 ui.label(egui::RichText::new("File type:").size(FL * 1.5));
-                ui.label(egui::RichText::new(&self.file_extension).color(Color32::DARK_GREEN));
+                ui.label(egui::RichText::new(&self.file_extension.to_uppercase()).color(Color32::DARK_GREEN));
                 ui.end_row();
                 ui.checkbox(&mut self.save_as_new, "Save as new");
+                ui.add_space(FL * 3.0);
+                ui.label(egui::RichText::new("Readonly:").size(FL * 1.5));
+                if self.picked_path != String::default() { ui.label(egui::RichText::new(&self.readonly.to_string()).color(Color32::DARK_GREEN)); }
                 ui.end_row();
                 if self.save_as_new {
                     ui.text_edit_singleline(&mut self.new_name);
+                    ui.end_row();
                 }
+                ui.checkbox(&mut self.readonly, "Make readonly");
+                if self.readonly && self.picked_path != String::default() { File::open(&self.picked_path).unwrap().metadata().unwrap().permissions().set_readonly(self.readonly); }
             });
-
-
+            //Grid end
             ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
                 ui.with_layout(Layout::left_to_right(Align::BOTTOM), |ui| {
                     egui::widgets::global_dark_light_mode_buttons(ui);
