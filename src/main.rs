@@ -3,6 +3,7 @@
 use std::fmt::Debug;
 use std::ops::Add;
 use std::os::windows::fs::MetadataExt;
+use std::path::Path;
 
 use eframe::{App, NativeOptions, run_native};
 use eframe::egui;
@@ -51,6 +52,7 @@ struct Enc {
     picked_path: String,
     display_path: String,
     new_name: String,
+    file_extension: String,
     save_as_new: bool,
     key: u8,
     file_size: u64,
@@ -64,6 +66,7 @@ impl Default for Enc {
             picked_path: String::default(),
             display_path: String::default(),
             new_name: String::default(),
+            file_extension: String::default(),
             save_as_new: false,
             key: 1,
             file_size: u64::default(),
@@ -119,11 +122,16 @@ impl App for Enc {
                         self.display_path = self.picked_path.clone();
                         self.new_name = self.picked_path.clone();
                         self.file_size = std::fs::metadata(&self.picked_path).unwrap().file_size();
+                        self.file_extension = Path::new(&self.picked_path).extension().unwrap().to_str().unwrap().to_string().replace('"', "");
                         if self.display_path.chars().count() > 99 {
                             self.display_path = self.picked_path.clone()[0..96].to_string().add("..");
                         }
                     }
                 }
+
+                ui.add_space(FL * 3.0);
+                ui.label(egui::RichText::new("File type:").size(FL * 1.5));
+                ui.label(egui::RichText::new(&self.file_extension).color(Color32::DARK_GREEN));
                 ui.end_row();
                 ui.checkbox(&mut self.save_as_new, "Save as new");
                 ui.end_row();
