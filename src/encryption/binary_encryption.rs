@@ -15,8 +15,8 @@ pub fn binary_enc(data: Vec<u8>) -> String {
 }
 
 pub fn binary_dec(data: Vec<u8>) -> String {
-    let parsed_data: String = str::from_utf8(&data).unwrap().to_string();
-    let dec_data: String = String::from_utf8(binary_to_decimal(&dec_util(parsed_data)).unwrap()).unwrap();
+    let dec_data: String = String::from_utf8(binary_to_decimal(&dec_util(str::from_utf8(&data).unwrap()
+        .to_string())).unwrap()).unwrap();
     return dec_data;
 }
 
@@ -33,14 +33,14 @@ pub fn dec_util(s: String) -> Vec<u32> {
 pub fn binary_util(input_file_path: &String, output_file_path: &String, should_dec: bool) {
     let mut input_data: Vec<u8> = Vec::new();
     let mut binary_data: String = String::new();
-    let mut reader: BufReader<File> = BufReader::new(File::open(&input_file_path).unwrap());
-    reader.read_to_end(&mut input_data).unwrap();
+    BufReader::new(File::open(&input_file_path).unwrap())
+        .read_to_end(&mut input_data).unwrap();
 
     match should_dec {
         true => { binary_data = binary_dec(input_data); }
         false => { binary_data = binary_enc(input_data); }
     }
 
-    let mut writer: BufWriter<File> = BufWriter::new(File::create(output_file_path).unwrap());
-    writer.write_all(&binary_data.into_bytes()).unwrap();
+    BufWriter::new(File::create(output_file_path).unwrap())
+        .write_all(&binary_data.into_bytes()).unwrap();
 }
