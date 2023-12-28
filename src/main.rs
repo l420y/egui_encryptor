@@ -3,20 +3,18 @@
 use eframe::{NativeOptions, run_native};
 use eframe::egui;
 
-use ui::Enc;
+use ui::EncryptorApp;
 
 pub mod encryption;
 pub mod ui;
 
-fn main() {
+fn main() -> Result<(), eframe::Error> {
     let options = NativeOptions {
-        initial_window_size: Some(egui::vec2(800.0, 400.0)),
-        maximized: false,
-        vsync: true,
-        drag_and_drop_support: true,
-        resizable: false,
-        fullscreen: false,
-        ..eframe::NativeOptions::default()
+        viewport: egui::ViewportBuilder::default().with_inner_size([300.0, 250.0]).with_fullscreen(true).with_always_on_top(),
+        centered: true,
+        vsync: false,
+        ..Default::default()
     };
-    run_native("Encryptor", options, Box::new(|_cc| Box::<Enc>::default())).unwrap();
+    run_native("Encryptor", options, Box::new(|cc| { Box::<EncryptorApp>::default() }),
+    )
 }
