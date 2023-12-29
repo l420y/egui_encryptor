@@ -1,5 +1,5 @@
 ## Egui-rs Encryptor
-Egui_encryptor is a Rust project that provides a simple and secure way to encrypt and decrypt file-data using the egui library.
+**Egui_encryptor is a Rust project that provides a simple and secure way to encrypt and decrypt file-data using the egui library.**
 
 ![alt text](https://cdn.discordapp.com/attachments/774181902336000013/1190259699526938684/crop-image-online.com_1703850399_imagepng_q3fiKa5C.png?ex=65a126ba&is=658eb1ba&hm=1f98821f1cdf298b8faa4872c2fa1d45ed2238018e6b8bc3c79275b66495e254&)
 ##
