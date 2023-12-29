@@ -15,3 +15,14 @@ At the moment, there are such cipher modes as:
 File utilities:
 - save file as new
 - make it readonly (win)
+
+### How to use
+There is a pre-release 0.1.5 version build - https://github.com/l420y/egui_encryptor/releases/tag/version-0.1.5
+
+Also you can run it from source:
+1) Clone repo to your computer
+
+2) ```rust
+ cd ../egui_encryptor
+ cargo run --release
+```
