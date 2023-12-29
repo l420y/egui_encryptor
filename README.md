@@ -21,8 +21,8 @@ There is a pre-release 0.1.5 version build - https://github.com/l420y/egui_encry
 
 Also you can run it from source:
 1) Clone repo to your computer
-
-2) ```rust cd ../egui_encryptor cargo run --release
+2) in cmd: **cd ../egui_encryptor**
+3) in cmd: **cargo run --release**
 
 
 
