@@ -21,8 +21,8 @@ There is a pre-release 0.1.5 version build - [here](https://github.com/l420y/egu
 
 Also you can run it from source:
 1) Clone repo to your computer
-2) in cmd: **cd ../egui_encryptor**
-3) in cmd: **cargo run --release**
+2) in cmd: ```cd ../egui_encryptor```
+3) in cmd: ```cargo run --release```
 
 ### Dependencies and libraries
 ```rust
