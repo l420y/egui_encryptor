@@ -1,5 +1,9 @@
-### About:
-![alt text](https://cdn.discordapp.com/attachments/768535544014831666/1137857561102647296/image.png)
-### Preview:
-![alt text](https://cdn.discordapp.com/attachments/768535544014831666/1137863216639258755/aaaakakashka.png)
+## Egui-rs Encryptor
+Egui_encryptor is a Rust project that provides a simple and secure way to encrypt and decrypt file-data using the egui library.
 
+Preview:
+![image](https://postimg.cc/30W9nrpW)
+##
+
+### About
+My native app was created for educational purposes, but has all the necessary functionality to change (encrypt\decrypt) any file data
